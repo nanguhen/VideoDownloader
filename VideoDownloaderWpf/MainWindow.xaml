@@ -1,0 +1,509 @@
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<Window x:Class="VideoDownloader.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="音视频下载器 - 基于 yt-dlp"
+        Width="1120"
+        Height="820"
+        MinWidth="980"
+        MinHeight="700"
+        WindowStartupLocation="CenterScreen"
+        Background="{DynamicResource FormBrush}"
+        Foreground="{DynamicResource TextBrush}"
+        Icon="Assets/app.ico">
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="360" MinHeight="140" MaxHeight="560" />
+        </Grid.RowDefinitions>
+
+        <TabControl x:Name="MainTabs"
+                    Background="Transparent"
+                    BorderThickness="0"
+                    Margin="0,0,0,10">
+            <TabItem Header="视频下载">
+                <Grid Margin="2,12,2,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="340" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                        <GroupBox Header="视频地址">
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="78" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="视频地址" VerticalAlignment="Center" />
+                                <TextBox x:Name="VideoUrlTextBox"
+                                         Grid.Column="1"
+                                         Height="34"
+                                         Margin="0,0,8,8"
+                                         VerticalContentAlignment="Center" />
+                                <StackPanel Grid.Column="2" Orientation="Horizontal">
+                                    <Button x:Name="PasteVideoButton" Click="PasteVideo_Click" Padding="10,6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE77F;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0" />
+                                            <TextBlock Text="粘贴" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button x:Name="VideoPreviewButton" Click="OpenVideoPreview_Click" Padding="10,6">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE774;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0" />
+                                            <TextBlock Text="预览网页" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+
+                                <TextBlock Grid.Row="1" Text="保存目录" VerticalAlignment="Center" />
+                                <TextBox x:Name="VideoOutputTextBox"
+                                         Grid.Row="1"
+                                         Grid.Column="1"
+                                         Height="34"
+                                         Margin="0,0,8,8"
+                                         VerticalContentAlignment="Center" />
+                                <Button Grid.Row="1" Grid.Column="2" Click="BrowseVideoOutput_Click" Padding="10,6">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0" />
+                                        <TextBlock Text="浏览" />
+                                    </StackPanel>
+                                </Button>
+
+                                <TextBlock Grid.Row="2" Text="下载格式" VerticalAlignment="Center" />
+                                <ComboBox x:Name="VideoFormatComboBox"
+                                          Grid.Row="2"
+                                          Grid.Column="1"
+                                          Height="34"
+                                          Margin="0,0,8,0"
+                                          VerticalContentAlignment="Center">
+                                    <ComboBoxItem Content="最佳 MP4（视频 + 音频，兼容性最好）" />
+                                    <ComboBoxItem Content="最佳质量（自动选择视频和音频）" />
+                                    <ComboBoxItem Content="仅提取音频 MP3" />
+                                </ComboBox>
+                                <Button Grid.Row="2" Grid.Column="2" Click="ListVideoFormats_Click" Padding="10,6">查看格式</Button>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="下载选项">
+                            <StackPanel Margin="4">
+                                <CheckBox x:Name="VideoOverwriteCheckBox"
+                                          IsChecked="True"
+                                          Content="已存在时覆盖文件"
+                                          Margin="0,0,0,10" />
+                                <TextBlock Foreground="{DynamicResource MutedBrush}"
+                                           Text="文件名会根据视频标题自动生成，无需手动填写。"
+                                           TextWrapping="Wrap"
+                                           Margin="0,0,0,14" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="VideoDownloadButton" Style="{StaticResource PrimaryButton}" Click="StartVideoDownload_Click" MinWidth="132">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0" />
+                                            <TextBlock Text="开始下载" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button x:Name="VideoPauseButton" Style="{StaticResource PauseButton}" Click="PauseCurrent_Click" IsEnabled="False" MinWidth="84">暂停</Button>
+                                    <Button x:Name="VideoResumeButton" Style="{StaticResource ResumeButton}" Click="ResumeCurrent_Click" IsEnabled="False" MinWidth="84">继续</Button>
+                                    <Button x:Name="VideoStopButton" Style="{StaticResource DangerButton}" Click="StopCurrent_Click" IsEnabled="False" MinWidth="96">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE71A;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0" />
+                                            <TextBlock Text="停止" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button x:Name="VideoOpenFolderButton" Click="OpenVideoFolder_Click" MinWidth="112">打开下载目录</Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <Border Background="{DynamicResource PanelBrush}"
+                                BorderBrush="{DynamicResource BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                Height="300">
+                            <Image x:Name="VideoPreviewImage"
+                                   Stretch="Uniform"
+                                   Margin="8" />
+                        </Border>
+                        <TextBlock x:Name="VideoPreviewStatusText"
+                                   Text="封面预览"
+                                   Foreground="{DynamicResource MutedBrush}"
+                                   Margin="2,8,0,0" />
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button x:Name="FetchVideoThumbnailButton" Click="FetchVideoThumbnail_Click" Padding="10,6">获取封面</Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="无损音乐">
+                <Grid Margin="2,12,2,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="340" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                        <GroupBox Header="音乐地址">
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="78" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="音乐地址" VerticalAlignment="Center" />
+                                <TextBox x:Name="MusicUrlTextBox"
+                                         Grid.Column="1"
+                                         Height="34"
+                                         Margin="0,0,8,8"
+                                         VerticalContentAlignment="Center" />
+                                <Button Grid.Column="2" Click="PasteMusic_Click" Padding="10,6">粘贴</Button>
+
+                                <TextBlock Grid.Row="1" Text="保存目录" VerticalAlignment="Center" />
+                                <TextBox x:Name="MusicOutputTextBox"
+                                         Grid.Row="1"
+                                         Grid.Column="1"
+                                         Height="34"
+                                         Margin="0,0,8,8"
+                                         VerticalContentAlignment="Center" />
+                                <Button Grid.Row="1" Grid.Column="2" Click="BrowseMusicOutput_Click" Padding="10,6">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="&#xE8B7;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0" />
+                                        <TextBlock Text="浏览" />
+                                    </StackPanel>
+                                </Button>
+
+                                <TextBlock Grid.Row="2" Text="音频格式" VerticalAlignment="Center" />
+                                <ComboBox x:Name="MusicFormatComboBox"
+                                          Grid.Row="2"
+                                          Grid.Column="1"
+                                          Height="34"
+                                          Margin="0,0,8,0"
+                                          VerticalContentAlignment="Center">
+                                    <ComboBoxItem Content="FLAC" />
+                                    <ComboBoxItem Content="ALAC" />
+                                    <ComboBoxItem Content="WAV" />
+                                </ComboBox>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="无损说明">
+                            <StackPanel Margin="4">
+                                <CheckBox x:Name="MusicEmbedCheckBox"
+                                          IsChecked="True"
+                                          Content="写入封面和元数据"
+                                          Margin="0,0,0,10" />
+                                <CheckBox x:Name="MusicPlaylistCheckBox"
+                                          Content="合集模式（下载整个播放列表/分P）"
+                                          Margin="0,0,0,8" />
+                                <Grid Margin="0,0,0,10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="78" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Text="合集范围" VerticalAlignment="Center" />
+                                    <TextBox x:Name="MusicPlaylistRangeTextBox"
+                                             Grid.Column="1"
+                                             Height="30"
+                                             VerticalContentAlignment="Center"
+                                             ToolTip="留空下载全部，例如 1-50 或 1,3,5" />
+                                </Grid>
+                                <TextBlock Foreground="{DynamicResource MutedBrush}"
+                                           TextWrapping="Wrap"
+                                           LineHeight="22"
+                                           Text="从 YouTube 等有损源转换出的 FLAC/ALAC/WAV 只是格式转换，不能恢复真正的无损音质。真正的无损来源通常需要 Tidal、Qobuz、Bandcamp 等提供无损流的站点，并配置对应登录 Cookies。"
+                                           Margin="0,0,0,14" />
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="MusicDownloadButton" Style="{StaticResource PrimaryButton}" Click="StartMusicDownload_Click" MinWidth="132">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE896;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0" />
+                                            <TextBlock Text="开始下载" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button x:Name="MusicPauseButton" Style="{StaticResource PauseButton}" Click="PauseCurrent_Click" IsEnabled="False" MinWidth="84">暂停</Button>
+                                    <Button x:Name="MusicResumeButton" Style="{StaticResource ResumeButton}" Click="ResumeCurrent_Click" IsEnabled="False" MinWidth="84">继续</Button>
+                                    <Button x:Name="MusicStopButton" Style="{StaticResource DangerButton}" Click="StopCurrent_Click" IsEnabled="False" MinWidth="96">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="&#xE71A;" FontFamily="Segoe MDL2 Assets" Margin="0,0,7,0" />
+                                            <TextBlock Text="停止" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button x:Name="MusicOpenFolderButton" Click="OpenMusicFolder_Click" MinWidth="112">打开音乐目录</Button>
+                                </StackPanel>
+                            </StackPanel>
+                        </GroupBox>
+                    </StackPanel>
+
+                    <Border Grid.Column="1"
+                            Background="{DynamicResource PanelBrush}"
+                            BorderBrush="{DynamicResource BorderBrush}"
+                            BorderThickness="1"
+                            CornerRadius="6"
+                            Padding="18"
+                            VerticalAlignment="Top">
+                        <StackPanel>
+                            <TextBlock Text="音质提示"
+                                       FontWeight="SemiBold"
+                                       FontSize="16"
+                                       Foreground="{DynamicResource HeadingBrush}"
+                                       Margin="0,0,0,12" />
+                            <TextBlock TextWrapping="Wrap"
+                                       LineHeight="24"
+                                       Text="yt-dlp 主要负责抓取和调用 ffmpeg 转码，它不会凭空提升源文件音质。请优先选择本身提供无损流的来源，并关闭其他不必要的转换步骤。" />
+                            <Separator Margin="0,16" />
+                            <TextBlock Text="建议工作流"
+                                       FontWeight="SemiBold"
+                                       Foreground="{DynamicResource HeadingBrush}"
+                                       Margin="0,0,0,8" />
+                            <TextBlock Text="1. 在设置页确认 ffmpeg 和 ffprobe 路径。&#x0a;2. 粘贴音乐页面地址并选择输出格式。&#x0a;3. 如有登录或地区限制，配置 Cookies 或代理。"
+                                       TextWrapping="Wrap"
+                                       LineHeight="24" />
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <TabItem Header="教程 / 帮助">
+                <ScrollViewer Margin="2,12,2,2" VerticalScrollBarVisibility="Auto">
+                    <StackPanel MaxWidth="920" HorizontalAlignment="Left">
+                        <TextBlock Text="使用说明"
+                                   FontSize="22"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource HeadingBrush}"
+                                   Margin="0,0,0,14" />
+                        <TextBlock TextWrapping="Wrap" LineHeight="24" Text="视频下载与无损音乐下载使用相同的基础工具，但参数相互独立。下载前请先在“设置”页确认 yt-dlp、ffmpeg、ffprobe 三个程序均可用。" Margin="0,0,0,10" />
+                        <TextBlock TextWrapping="Wrap" LineHeight="24" Text="无损音乐标签支持合集模式：粘贴 B 站分P或 YouTube 播放列表地址后勾选“合集模式”，合集范围留空表示全部，也可以填写 1-50、1,3,5。文件会按合集名创建子文件夹。" Margin="0,0,0,20" />
+                        <TextBlock TextWrapping="Wrap" LineHeight="24" Text="如果网站提示登录、年龄限制、地区限制或下载失败，优先配置 Cookies 和 HTTP 代理。yt-dlp 支持大量网站，但不同网站可用性和稳定性会随时间变化。" Margin="0,0,0,20" />
+
+                        <TextBlock Text="支持网站概览"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource HeadingBrush}"
+                                   Margin="0,0,0,8" />
+                        <TextBlock TextWrapping="Wrap" LineHeight="24" Text="YouTube、Bilibili、X / Twitter、TikTok、抖音、Vimeo、Twitch、SoundCloud、Bandcamp、Facebook、Instagram、Reddit、Dailymotion、Niconico、Pornhub 等数千个站点。完整列表以 yt-dlp 官方支持列表为准。" Margin="0,0,0,20" />
+
+                        <TextBlock Text="工具官方仓库"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource HeadingBrush}"
+                                   Margin="0,0,0,8" />
+                        <StackPanel>
+                            <TextBlock Margin="0,0,0,6"><Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp" RequestNavigate="HelpLink_RequestNavigate">yt-dlp 主仓库</Hyperlink></TextBlock>
+                            <TextBlock Margin="0,0,0,6"><Hyperlink NavigateUri="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" RequestNavigate="HelpLink_RequestNavigate">yt-dlp 完整支持站点列表</Hyperlink></TextBlock>
+                            <TextBlock Margin="0,0,0,6"><Hyperlink NavigateUri="https://ffmpeg.org/download.html" RequestNavigate="HelpLink_RequestNavigate">FFmpeg 官方下载页</Hyperlink></TextBlock>
+                            <TextBlock Margin="0,0,0,6"><Hyperlink NavigateUri="https://github.com/BtbN/FFmpeg-Builds/releases" RequestNavigate="HelpLink_RequestNavigate">Windows FFmpeg 预编译包</Hyperlink></TextBlock>
+                        </StackPanel>
+
+                        <TextBlock Text="常见问题"
+                                   FontSize="16"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource HeadingBrush}"
+                                   Margin="0,22,0,8" />
+                        <TextBlock TextWrapping="Wrap" LineHeight="24" Text="1. 提示找不到工具：在“设置”页重新选择或点击“自动查找工具”。&#x0a;2. 下载的视频没有声音：确认 ffmpeg 路径正确，并保持视频格式为“最佳 MP4”或“最佳质量”。&#x0a;3. YouTube 要求登录验证：在“设置”页把 Cookies 来源改为 Chrome/Edge，或重新导出 cookies.txt。&#x0a;4. 无损音乐音质不达预期：检查来源是否真正提供无损流。&#x0a;5. 合集下载中断后重新运行，会自动跳过已下载条目。" Margin="0,0,0,20" />
+
+                        <Button x:Name="OpenHelpDocButton" Click="OpenHelpDoc_Click" Style="{StaticResource PrimaryButton}" HorizontalAlignment="Left" MinWidth="150">打开完整离线教程</Button>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <TabItem Header="设置">
+                <Grid Margin="2,12,2,2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="340" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Margin="0,0,14,0">
+                        <GroupBox Header="工具路径">
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="78" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <TextBlock Text="yt-dlp" VerticalAlignment="Center" />
+                                <TextBox x:Name="YtDlpTextBox" Grid.Column="1" Height="32" Margin="0,0,8,8" VerticalContentAlignment="Center" />
+                                <Button Grid.Column="2" Click="BrowseYtDlp_Click" Padding="10,6">浏览</Button>
+
+                                <TextBlock Grid.Row="1" Text="ffmpeg" VerticalAlignment="Center" />
+                                <TextBox x:Name="FfmpegTextBox" Grid.Row="1" Grid.Column="1" Height="32" Margin="0,0,8,8" VerticalContentAlignment="Center" />
+                                <Button Grid.Row="1" Grid.Column="2" Click="BrowseFfmpeg_Click" Padding="10,6">浏览</Button>
+
+                                <TextBlock Grid.Row="2" Text="ffprobe" VerticalAlignment="Center" />
+                                <TextBox x:Name="FfprobeTextBox" Grid.Row="2" Grid.Column="1" Height="32" Margin="0,0,8,8" VerticalContentAlignment="Center" />
+                                <Button Grid.Row="2" Grid.Column="2" Click="BrowseFfprobe_Click" Padding="10,6">浏览</Button>
+
+                                <TextBlock Grid.Row="3" Text="Cookies" VerticalAlignment="Center" />
+                                <TextBox x:Name="CookiesTextBox" Grid.Row="3" Grid.Column="1" Height="32" Margin="0,0,8,0" VerticalContentAlignment="Center" />
+                                <Button Grid.Row="3" Grid.Column="2" Click="BrowseCookies_Click" Padding="10,6">浏览</Button>
+                                <TextBlock Grid.Row="4" Text="Cookies来源" VerticalAlignment="Center" Margin="0,12,0,0" />
+                                <ComboBox x:Name="CookiesSourceComboBox" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Height="32" Margin="0,8,0,0" VerticalContentAlignment="Center">
+                                    <ComboBoxItem Content="Cookies 文件" />
+                                    <ComboBoxItem Content="Chrome" />
+                                    <ComboBoxItem Content="Edge" />
+                                    <ComboBoxItem Content="Firefox" />
+                                    <ComboBoxItem Content="不使用" />
+                                </ComboBox>
+                            </Grid>
+                        </GroupBox>
+
+                        <GroupBox Header="网络">
+                            <Grid Margin="4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="78" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <TextBlock Text="代理地址" VerticalAlignment="Center" />
+                                <TextBox x:Name="ProxyTextBox" Grid.Column="1" Height="32" VerticalContentAlignment="Center" />
+                                <TextBlock Grid.Row="1" Text="浏览器伪装" VerticalAlignment="Center" Margin="0,12,0,0" />
+                                <ComboBox x:Name="ImpersonateComboBox" Grid.Row="1" Grid.Column="1" Height="32" Margin="0,8,0,0" VerticalContentAlignment="Center">
+                                    <ComboBoxItem Content="自动" />
+                                    <ComboBoxItem Content="Safari" />
+                                    <ComboBoxItem Content="Chrome" />
+                                    <ComboBoxItem Content="Edge" />
+                                    <ComboBoxItem Content="Firefox" />
+                                    <ComboBoxItem Content="不启用" />
+                                </ComboBox>
+                            </Grid>
+                        </GroupBox>
+
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,12">
+                            <Button x:Name="SaveSettingsButton" Click="SaveSettings_Click" MinWidth="118">保存设置</Button>
+                            <Button x:Name="VerifyPathsButton" Click="VerifyPaths_Click" MinWidth="118">测试工具路径</Button>
+                            <Button x:Name="AutoFindButton" Click="AutoFindTools_Click" MinWidth="118">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE721;" FontFamily="Segoe MDL2 Assets" Margin="0,0,6,0" />
+                                    <TextBlock Text="自动查找工具" />
+                                </StackPanel>
+                            </Button>
+                            <Button x:Name="ResetPathsButton" Click="ResetPaths_Click" MinWidth="118">恢复默认路径</Button>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1">
+                        <GroupBox Header="界面外观">
+                            <StackPanel Margin="4">
+                                <TextBlock Text="皮肤" Foreground="{DynamicResource MutedBrush}" Margin="0,0,0,8" />
+                                <ComboBox x:Name="ThemeComboBox" Height="34" VerticalContentAlignment="Center" SelectionChanged="ThemeComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="极简浅色" />
+                                    <ComboBoxItem Content="雾蓝" />
+                                    <ComboBoxItem Content="青瓷" />
+                                </ComboBox>
+                                <TextBlock Text="切换后立即生效并自动保存"
+                                           Foreground="{DynamicResource MutedBrush}"
+                                           Margin="0,10,0,0" />
+                            </StackPanel>
+                        </GroupBox>
+                        <GroupBox Header="便携性">
+                            <TextBlock TextWrapping="Wrap" LineHeight="22" Text="程序、配置和教程均存放在同一目录，可整体复制到其他文件夹使用。升级工具后，在本页重新选择路径或点击“自动查找工具”即可。" />
+                        </GroupBox>
+                    </StackPanel>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <GridSplitter Grid.Row="1"
+                      Height="7"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      Background="Transparent"
+                      ShowsPreview="True"
+                      ResizeDirection="Rows"
+                      Cursor="SizeNS"
+                      Margin="0,0,0,2" />
+
+        <Border Grid.Row="2"
+                Background="{DynamicResource LogBackBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="6">
+            <Grid Margin="8">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <ProgressBar x:Name="ProgressBar"
+                                 Height="16"
+                                 Minimum="0"
+                                 Maximum="100"
+                                 Value="0"
+                                 Foreground="{DynamicResource AccentBrush}"
+                                 Background="{DynamicResource PanelBrush}"
+                                 BorderThickness="0"
+                                 VerticalAlignment="Center" />
+                    <TextBlock x:Name="ProgressTextBlock"
+                               Grid.Column="1"
+                               Text="0%"
+                               MinWidth="74"
+                               TextAlignment="Right"
+                               Foreground="{DynamicResource TextBrush}"
+                               Margin="12,0,12,0"
+                               VerticalAlignment="Center" />
+                    <TextBlock x:Name="StatusText"
+                               Grid.Column="2"
+                               Text="就绪"
+                               Foreground="{DynamicResource MutedBrush}"
+                               Margin="0,0,0,0"
+                               VerticalAlignment="Center" />
+                </Grid>
+                <Grid Grid.Row="1" Margin="0,8,0,0">
+                    <TextBlock Text="运行日志"
+                               Foreground="{DynamicResource HeadingBrush}"
+                               FontWeight="SemiBold"
+                               VerticalAlignment="Center" />
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <Button x:Name="CopyLogButton" Click="CopyLog_Click" Padding="8,4">复制日志</Button>
+                        <Button x:Name="ClearLogButton" Click="ClearLog_Click" Padding="8,4">清空日志</Button>
+                    </StackPanel>
+                </Grid>
+                <TextBox x:Name="LogTextBox"
+                         Grid.Row="2"
+                         Margin="0,8,0,0"
+                         IsReadOnly="True"
+                         AcceptsReturn="True"
+                         TextWrapping="NoWrap"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Auto"
+                         Background="{DynamicResource LogBackBrush}"
+                         Foreground="{DynamicResource LogForeBrush}"
+                         BorderThickness="0"
+                         FontFamily="Cascadia Mono, Consolas"
+                         FontSize="12" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

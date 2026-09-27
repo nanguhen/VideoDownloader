@@ -1,0 +1,153 @@
+<!doctype html>
+<!-- SPDX-License-Identifier: GPL-3.0-only -->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>音视频下载器使用教程</title>
+<style>
+  :root {
+    color-scheme: light;
+    --bg: #f6f7f9;
+    --panel: #ffffff;
+    --text: #1f2937;
+    --muted: #64748b;
+    --accent: #0d9488;
+    --line: #d8dee6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", "Microsoft YaHei UI", "Microsoft YaHei", sans-serif;
+    line-height: 1.7;
+  }
+  header {
+    padding: 34px 24px 26px;
+    background: linear-gradient(135deg, #0f766e, #1e3a8a);
+    color: #fff;
+  }
+  header h1 { margin: 0 0 8px; font-size: 28px; }
+  header p { margin: 0; opacity: .9; }
+  main { max-width: 980px; margin: 0 auto; padding: 24px 20px 60px; }
+  section {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 22px 24px;
+    margin: 0 0 18px;
+  }
+  h2 { margin: 0 0 14px; font-size: 21px; }
+  h3 { margin: 18px 0 8px; font-size: 16px; }
+  p, li { color: var(--text); }
+  .muted { color: var(--muted); }
+  a { color: var(--accent); }
+  code {
+    background: #eef2f5;
+    border-radius: 4px;
+    padding: 2px 5px;
+    font-family: "Cascadia Mono", Consolas, monospace;
+    font-size: 13px;
+  }
+  .warning {
+    border-left: 4px solid #f59e0b;
+    background: #fff8eb;
+    padding: 12px 14px;
+    border-radius: 6px;
+  }
+  ul { padding-left: 20px; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>音视频下载器使用教程</h1>
+  <p>基于 yt-dlp 与 FFmpeg 的 Windows 图形化下载工具</p>
+</header>
+<main>
+  <section>
+    <h2>快速开始</h2>
+    <ol>
+      <li>在“设置”页确认 <code>yt-dlp.exe</code>、<code>ffmpeg.exe</code>、<code>ffprobe.exe</code> 的路径正确。可点击“测试工具路径”。</li>
+      <li>切换到“视频下载”或“无损音乐”，粘贴网页地址。</li>
+      <li>选择输出目录和格式，点击“开始下载”。</li>
+      <li>下载时可使用“暂停”“继续”“停止”控制任务；“暂停”会挂起当前 yt-dlp 进程。</li>
+      <li>底部日志会显示进度和错误信息，下载完成后可用 <code>ffprobe</code> 校验音视频流。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>无损音乐说明</h2>
+    <div class="warning">
+      <strong>重要：</strong>从 YouTube 等有损来源转换出的 FLAC、ALAC 或 WAV 只是文件格式转换，不能恢复原始音质中被压缩掉的信息。只有 Tidal、Qobuz、Bandcamp 等提供无损流的来源，配合登录 Cookies，才可能获得接近或真正无损的音频。
+    </div>
+    <p>音乐标签使用 <code>-x</code> 提取音频，再交给 FFmpeg 转为所选格式，并可选写入封面和元数据。格式选择：FLAC、ALAC、WAV。</p>
+  </section>
+
+  <section>
+    <h2>合集下载</h2>
+    <h3>YouTube 播放列表</h3>
+    <ol>
+      <li>打开 YouTube 播放列表页面，复制浏览器地址栏中的播放列表 URL。</li>
+      <li>在“无损音乐”标签粘贴地址，勾选“合集模式”。</li>
+      <li>合集范围留空表示下载全部；也可以填写 <code>1-50</code> 或 <code>1,3,5</code> 只下载指定条目。</li>
+      <li>点击“开始下载”，文件会保存到所选目录下的“合集标题”子文件夹中。</li>
+    </ol>
+    <h3>B 站分P合集</h3>
+    <ol>
+      <li>打开包含多个分P的 B 站视频页面，复制 BV 地址。</li>
+      <li>在“无损音乐”标签粘贴地址，勾选“合集模式”。</li>
+      <li>每个分P会保存为单独的 FLAC/ALAC/WAV 文件，并按合集名创建子文件夹。</li>
+      <li>已下载过的条目会自动跳过；合集中断后再次运行会从剩余条目继续。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>支持网站概览</h2>
+    <p>yt-dlp 支持数千个网站，常见包括：</p>
+    <ul>
+      <li>视频：YouTube、Bilibili、Vimeo、Dailymotion、Twitch、Niconico、Pornhub</li>
+      <li>短视频：TikTok、抖音、快手、Instagram Reels、Facebook Watch</li>
+      <li>社交：X / Twitter、Instagram、Facebook、Reddit、Tumblr</li>
+      <li>音频：SoundCloud、Bandcamp、Mixcloud、网易云音乐（部分）</li>
+      <li>直播回放与更多站点以官方列表为准</li>
+    </ul>
+    <p>完整支持列表：<a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md" target="_blank" rel="noopener">yt-dlp supportedsites.md</a></p>
+  </section>
+
+  <section>
+    <h2>官方下载仓库</h2>
+    <ul>
+      <li>yt-dlp 主仓库：<a href="https://github.com/yt-dlp/yt-dlp" target="_blank" rel="noopener">https://github.com/yt-dlp/yt-dlp</a></li>
+      <li>yt-dlp 发布下载：<a href="https://github.com/yt-dlp/yt-dlp/releases" target="_blank" rel="noopener">https://github.com/yt-dlp/yt-dlp/releases</a></li>
+      <li>FFmpeg 官方下载：<a href="https://ffmpeg.org/download.html" target="_blank" rel="noopener">https://ffmpeg.org/download.html</a></li>
+      <li>Windows FFmpeg 预编译包：<a href="https://github.com/BtbN/FFmpeg-Builds/releases" target="_blank" rel="noopener">https://github.com/BtbN/FFmpeg-Builds/releases</a></li>
+      <li>FFprobe 通常随 FFmpeg 一起提供，无需单独下载。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>升级工具后如何恢复</h2>
+    <ol>
+      <li>下载并解压新版 yt-dlp 或 FFmpeg。</li>
+      <li>打开程序“设置”页，手动重新选择 <code>yt-dlp.exe</code>、<code>ffmpeg.exe</code>、<code>ffprobe.exe</code>。</li>
+      <li>或者点击“自动查找工具”，程序会扫描程序目录及其上级目录中的匹配文件。</li>
+      <li>点击“保存设置”。配置保存在程序同目录的 <code>VideoDownloader.config</code>，可随文件夹整体复制。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>常见问题</h2>
+    <h3>下载的视频没有声音</h3>
+    <p>确认 ffmpeg 路径正确，并使用“最佳 MP4”或“最佳质量”。这些格式会自动合并最佳视频流和音频流。若仍无声，请升级 ffmpeg 和 yt-dlp。</p>
+    <h3>YouTube 或某些网站下载失败</h3>
+    <p>通常与登录、年龄限制、地区限制或反爬有关。可在设置页填写导出的 Cookies 文件、配置 HTTP 代理，例如 <code>http://127.0.0.1:7890</code>，并把“浏览器伪装”保持为“自动”。如果提示“Sign in to confirm you’re not a bot”，可把“Cookies 来源”改为 Chrome 或 Edge 直接读取浏览器登录状态；如果浏览器 Cookies 解密失败，则重新导出 <code>cookies.txt</code> 后改回“Cookies 文件”。</p>
+    <h3>提示找不到 ffprobe</h3>
+    <p>FFprobe 是 FFmpeg 的一部分，从 Windows FFmpeg 压缩包中的 <code>bin</code> 文件夹选择 <code>ffprobe.exe</code>。</p>
+    <h3>无损音乐音质不达预期</h3>
+    <p>确认来源本身提供无损流，而不是仅把有损 MP3/AAC 转码成 FLAC。输出文件大小不能作为无损判断依据。</p>
+  </section>
+</main>
+</body>
+</html>

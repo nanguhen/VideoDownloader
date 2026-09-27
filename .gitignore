@@ -1,0 +1,34 @@
+# Build output
+**/bin/
+**/obj/
+**/publish/
+*.exe
+*.dll
+*.pdb
+*.cache
+*.user
+*.suo
+
+# Local application settings
+VideoDownloader.config
+
+# Cookies and authentication data
+cookies.txt
+**/cookies.txt
+
+# Logs and exported logs
+*.log
+VideoDownloader-日志.txt
+
+# Temporary downloads and test artifacts
+test_*/
+*.part
+*.ytdl
+
+# Local planning document
+GITHUB_PUBLISH_PLAN.md
+AGENTS.md
+
+# Release staging output
+release/portable/
+release/*.zip
